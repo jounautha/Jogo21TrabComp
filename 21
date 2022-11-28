@@ -1,0 +1,357 @@
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+
+int embaralhar(int cartas[])
+{
+	
+	int t, i, mesa[52];	
+	for (i=0;i<52;i++)
+		mesa[i] = (i/13+3)*100 + i%13 + 1;
+
+	srand(time(NULL));
+	for (i = 0; i < 52; i++)
+	{
+		do
+		{
+			t = rand() % 52;
+		} while (mesa[t] == 0);
+		cartas[i] = mesa[t];
+		mesa[t] = 0;
+	}
+	
+	return 0;
+}
+
+int converterJQK(int a)
+{
+	if ((a%100==11) ||(a%100==12) ||(a%100==13)) return (a/100)*100+10;
+	else return a;
+}
+
+void facecarta(int num)
+{
+	char naipe;
+	int valorcarta;
+	
+	naipe = num / 100;
+	valorcarta = num % 100;
+	switch (valorcarta)
+	{
+		case 1: 
+		{
+
+			printf(" %c A  \n", naipe);
+
+			break;
+		}
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+		case 9:
+		case 10:
+		{
+
+			printf(" %c%2d   \n", naipe,valorcarta);
+
+			break;
+		}
+		case 11:
+		{
+
+			printf(" %c J  \n", naipe);
+
+			break;
+		}
+		case 12:
+		{
+
+			printf(" %c Q  \n", naipe);
+
+			break;
+		}
+		case 13:
+		{
+
+			printf(" %c K   \n", naipe);
+
+			break;
+		}
+
+	}
+}
+
+int play(int fichas)
+{
+	int i;
+	int somajogador=0;
+	int somacrupie=0;
+	int pcartas[5]={0};
+	int bcartas[5]={0};
+	int cartas[52];
+	char d;
+	int fichasapostadas;
+	printf("Quantas fichas quer apostar?\n(Maximo 200)\n");
+	do{
+		scanf("%d",&fichasapostadas);
+	} while (fichasapostadas<=0 || fichasapostadas>200 || fichasapostadas>fichas);
+	
+	embaralhar(cartas);
+
+	pcartas[0]=cartas[0];
+	pcartas[1]=cartas[1];
+	bcartas[0]=cartas[2];
+	bcartas[1]=cartas[3];
+	
+	printf("Uma das cartas do crupie:\n");
+	facecarta(bcartas[0]);
+	printf("\n");
+	printf("Suas cartas:\n");
+	facecarta(pcartas[0]);
+	facecarta(pcartas[1]);
+	
+	i=0;
+	for (i=0; i<2; i++)
+	{
+		if (pcartas[i]%100 == 1)
+		{
+			printf("escolha o valor da carta %d, 's' para 11 ou 'n' para 1 :\n", i+1);
+			do{
+				d = getchar();
+			} while (d!='s' && d!='n');
+			
+			if (d == 's')
+			{
+				printf("Escolheste valor 11 para carta A.\n");
+				somajogador +=11;
+			}
+			else if(d == 'n')
+			{
+				printf("Escolheste o valor 1 para carta A.\n");
+				somajogador +=+1;
+			}
+		}
+		else if (converterJQK(pcartas[i]) %100 ==10) somajogador+= 10;
+		else somajogador += pcartas[i]%100;
+		
+		if (somajogador > 21)
+		{
+			printf("Soma de suas cartas:%d\n\n",somajogador);
+			printf("Vitoria do crupie!\n");
+			fichas-=fichasapostadas;
+			return fichas;
+		}
+		else if (somajogador == 21)
+		{
+			printf("Soma de suas cartas:%d\n\n",somajogador);
+			printf("BlackJack!!!");
+			printf("Vitoria do jogador!\n");
+			fichas+= (1.5*fichasapostadas);
+			return fichas;
+		}
+	}
+	printf("Soma de suas cartas:%d\n\n",somajogador);
+	
+	i=0;
+	for (i=0; i<3; i++)
+	{
+		char j = 'n';
+		
+		printf("Quer mais cartas? 's', 'n', ou 'd' para dobrar a aposta:\n");
+		do{
+			j = getchar();
+		} while (j!='s' &&j!='n' &&j!='d');
+
+		if (j == 'd') {
+			printf("Sua aposta foi dobrada!\n");
+			fichasapostadas = 2*fichasapostadas;
+		}
+		if (j=='s' || j=='d')
+		{
+			printf("Aqui esta sua proxima carta\n");
+			pcartas[i+2]=cartas[i+4];
+			printf("Sua carta %d eh:\n", i+3);
+			facecarta(pcartas[i+2]);
+			
+			if (pcartas[i+2]%100 == 1)
+			{
+				printf("Escolha o valor para carta As %d, input 's' for 11 or 'n' for 1:\n", i+3);
+				do{
+					d = getchar();
+				} while (d!='s' && d!='n');	
+				if (d == 's')
+				{
+					printf("Escolheste valor 11 para carta A.\n");
+					somajogador = somajogador + 11;
+				}
+				else if(d == 'n')
+				{
+					printf("Escolheste o valor 1 para carta A.\n");
+					somajogador = somajogador +1;
+				}
+			}
+			else if (converterJQK(pcartas[i+2]) %100 ==10) somajogador = somajogador + 10;
+			else somajogador = somajogador + pcartas[i+2]%100;
+			
+			if (somajogador > 21)
+			{
+				printf("Soma de suas cartas:%d\n\n",somajogador);
+				printf("Vitoria do crupie!\n");
+				fichas-=(fichasapostadas);
+				return fichas;
+			}
+			else if (somajogador == 21)
+			{
+				printf("Soma de suas cartas:%d\n\n",somajogador);
+				printf("Vitoria do jogador!\n");
+				fichas+=fichasapostadas;
+				return fichas;
+			}		
+			else printf("Soma de suas cartas:%d\n\n",somajogador);
+		}
+		else 
+		{
+			printf("Soma de suas cartas:%d\n\n",somajogador);
+			break;
+		}
+	}
+	if (i == 3&&somajogador<22)
+	{
+		printf("Vitoria do jogador! Pois a soma de suas 5 cartas nao excedeu 21!\n");
+		fichas+=(fichasapostadas*2);
+		return fichas;
+	}
+	printf("Cartas do crupie:\n");
+	facecarta(bcartas[0]);
+	facecarta(bcartas[1]);
+
+	if (bcartas[0]%100 + bcartas[1]%100 == 2)
+	{
+		somacrupie=12; 
+		printf("Soma das cartas do crupie:%d\n\n", somacrupie);
+	}
+	else if ((converterJQK(bcartas[0]))%100 + (converterJQK(bcartas[1]))%100 ==1)
+	{
+		somacrupie=21;
+		printf("Soma das cartas do crupie:%d\n\n", somacrupie);
+		printf("Vitoria do crupie!\n");
+		fichas-=fichasapostadas;
+		return fichas;
+	}
+	else if (bcartas[0]%100==1 || bcartas[1]%100==1)
+	{
+		somacrupie=(bcartas[0]+bcartas[1])%100+(rand()%2)*10;
+		printf("Soma das cartas do crupie:%d\n\n", somacrupie);
+	}
+	else
+	{
+		somacrupie = (converterJQK(bcartas[0]))%100 + (converterJQK(bcartas[1]))%100;
+		printf("Soma das cartas do crupie:%d\n\n", somacrupie);
+	}
+	
+	for (i=0; i<3 && somacrupie<17; i++)
+	{
+		bcartas[i+2]=cartas[i+7];
+		printf("A carta %d do crupie eh:\n", i+3);
+		facecarta(bcartas[i+2]);
+		
+		if (bcartas[i+2]%100 == 1)
+		{
+			if (somacrupie+11 <= 21)
+			{
+				printf("O crupie escolheu As como 11\n");
+				somacrupie = somacrupie+11;
+				printf("Soma das cartas do crupie:%d\n\n", somacrupie);
+			}
+			else
+			{
+				printf("O crupie escolheu As como 1\n");
+				somacrupie = somacrupie+1;
+				printf("Soma das cartas do crupie:%d\n\n", somacrupie);
+			}
+		}
+		else
+		{
+			somacrupie = somacrupie + converterJQK(bcartas[i+2])%100;
+			printf("Soma das cartas do crupie:%d\n\n", somacrupie);
+		}
+	}
+	if (i == 3&&somacrupie<22)
+	{
+		printf("Vitoria do crupie! Pois a soma de 5 cartas nao foi maior que 21!\n");
+		fichas-=fichasapostadas;
+		return fichas;
+	}
+	if (somacrupie>21 || somajogador>somacrupie)
+	{
+		printf("Vitoria do jogador!\n");
+		fichas+=fichasapostadas;
+		return fichas;
+	}
+	else if (somajogador == somacrupie)
+	{
+		printf("O jogador e o crupie tem a mesma pontuacao\n");
+		return fichas;
+	}
+	else if (somajogador < somacrupie)
+	{
+		printf("Vitoria do crupie!\n");
+		fichas-=fichasapostadas;
+		return fichas;
+	}
+		
+	return 3;
+}
+
+int main(void)
+{
+	int fichas, fichas_atual, aux, i = 0;
+	char denovo,segue;
+
+	printf("Bem vindo ao simulador em texto de 21!\nAperte Enter para comecar a jogar\n");
+	do{
+		segue = getchar();
+	} while (segue != '\n');
+	printf("\n");
+	
+	printf("Quantas fichas Deseja iniciar?\n(Minimo 200)\n\n");
+	do{
+		scanf("%d", &fichas);
+	}while(fichas<200);
+	
+	aux=fichas;
+	fichas_atual = fichas;
+
+	while (i == 0)
+	{
+	fichas_atual=play(fichas_atual);
+	printf("Suas fichas atuais %d", fichas_atual);
+
+	if (fichas_atual>0){  
+		printf("\nGostaria de jogar de novo? 's' ou 'n':\n");
+		do{
+			denovo = getchar();
+		} while (denovo!='s' && denovo!='n');
+
+		if (denovo == 's')
+		{
+			printf("\nOK, outra mao!\n\n");
+			/*main();*/
+		}
+		else {
+			printf("Parabens! Voce comecou com %d e terminou com %d!\n", aux, fichas_atual);
+			i++;
+		}
+	}
+	else {
+		printf(" GAME OVER!\nVoce ficara devendo %d fichas!", fichas_atual);
+		i++;
+	}
+	}
+	
+	return 0;
+}
